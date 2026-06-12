@@ -1,5 +1,6 @@
 package me.alpha432.oyvey.util.inventory;
 
+import me.alpha432.oyvey.mixin.accessor.AccessorMultiPlayerGameMode;
 import me.alpha432.oyvey.util.inventory.strategy.HoldingStrategy;
 import me.alpha432.oyvey.util.inventory.strategy.HotbarStrategy;
 import me.alpha432.oyvey.util.inventory.strategy.InventoryStrategy;
@@ -61,7 +62,7 @@ public final class InventoryUtil implements Util {
     public static void swap(int to) {
         if (to < 0 || to > 8) return;
         mc.player.getInventory().setSelectedSlot(to);
-        mc.gameMode.ensureHasSentCarriedItem();
+        ( (AccessorMultiPlayerGameMode) mc.gameMode).oyvey$syncSlot();
     }
 
     public static boolean swap(Result result) {

@@ -23,31 +23,50 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import static me.alpha432.oyvey.util.traits.Util.EVENT_BUS;
 import static me.alpha432.oyvey.util.traits.Util.mc;
 
-@Mixin(LevelRenderer.class)
-public class MixinLevelRenderer {
-    @Inject(method = "renderBlockOutline", at = @At("HEAD"), cancellable = true)
-    public void renderBlockOutline(MultiBufferSource.BufferSource bufferSource, PoseStack poseStack, boolean bl, LevelRenderState levelRenderState, CallbackInfo ci) {
-        if (EVENT_BUS.post(new RenderBlockOutlineEvent())) {
-            ci.cancel();
-        }
+@Mixin( LevelRenderer.class )
+public class MixinLevelRenderer
+{
+    @Inject( method = "renderBlockOutline",
+            at = @At( "HEAD" ),
+            cancellable = true )
+    public void renderBlockOutline(
+            MultiBufferSource.BufferSource bufferSource,
+            PoseStack poseStack,
+            boolean bl,
+            LevelRenderState levelRenderState,
+            CallbackInfo ci
+                                  )
+    {
+        if ( EVENT_BUS.post( new RenderBlockOutlineEvent() ) ) ci.cancel();
     }
 
-    @Inject(method = "renderLevel", at = @At("RETURN"))
-    private void render(GraphicsResourceAllocator allocator, DeltaTracker tickCounter, boolean renderBlockOutline,
-                        Camera camera, Matrix4f positionMatrix, Matrix4f matrix4f, Matrix4f projectionMatrix,
-                        GpuBufferSlice fogBuffer, Vector4f fogColor, boolean renderSky, CallbackInfo ci, @Local ProfilerFiller profiler) {
+    @Inject( method = "renderLevel",
+            at = @At( value = "INVOKE",
+                    target = "Lnet/minecraft/client/renderer/LevelTargetBundle;clear()V",
+                    shift = At.Shift.AFTER ) )
+    private void render(
+            GraphicsResourceAllocator allocator,
+            DeltaTracker tickCounter,
+            boolean renderBlockOutline,
+            Camera camera,
+            Matrix4f positionMatrix,
+            Matrix4f matrix4f,
+            Matrix4f projectionMatrix,
+            GpuBufferSlice fogBuffer,
+            Vector4f fogColor,
+            boolean renderSky,
+            CallbackInfo ci,
+            @Local ProfilerFiller profiler
+                       )
+    {
 
         PoseStack stack = new PoseStack();
-        stack.pushPose();
-        stack.mulPose(Axis.XP.rotationDegrees(mc.gameRenderer.getMainCamera().xRot()));
-        stack.mulPose(Axis.YP.rotationDegrees(mc.gameRenderer.getMainCamera().yRot() + 180f));
-
-        profiler.push("oyvey-render-3d");
-
-        Render3DEvent event = new Render3DEvent(stack, tickCounter.getGameTimeDeltaPartialTick(true));
-        EVENT_BUS.post(event);
-        stack.popPose();
-        profiler.pop();
+        profiler.popPush( "oyvey-render-3d" );
+        Render3DEvent event = new Render3DEvent(
+                stack,
+                tickCounter.getGameTimeDeltaPartialTick( true )
+        );
+        EVENT_BUS.post( event );
     }
 
 }

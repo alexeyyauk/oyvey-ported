@@ -4,16 +4,20 @@
   "package": "me.alpha432.oyvey.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "accessor.AccessorMinecraft",
+    "client.MixinMinecraft",
     "network.MixinConnection"
   ],
   "client": [
+    "accessor.AccessorMultiPlayerGameMode",
+    "client.MixinMultiPlayerGameMode",
     "entity.MixinClientPlayerEntity",
     "input.MixinKeyboardHandler",
     "input.MixinMouseHandler",
     "network.MixinClientPacketListener",
     "render.MixinChatComponent",
-    "render.MixinLevelRenderer",
     "render.MixinDeltaTrackerTimer",
+    "render.MixinLevelRenderer",
     "render.gui.MixinCommandSuggestions",
     "render.gui.MixinGui"
   ],

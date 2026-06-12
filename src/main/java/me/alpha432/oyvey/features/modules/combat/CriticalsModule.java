@@ -1,37 +1,53 @@
 package me.alpha432.oyvey.features.modules.combat;
 
 import me.alpha432.oyvey.event.impl.network.PacketEvent;
-import me.alpha432.oyvey.event.system.Subscribe;
 import me.alpha432.oyvey.features.modules.Module;
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 
-public class CriticalsModule extends Module {
-    public CriticalsModule() {
-        super("Criticals", "Makes you do critical hits", Category.COMBAT);
+public class CriticalsModule extends Module
+{
+    public static CriticalsModule INSTANCE;
+    public CriticalsModule()
+    {
+        super( "Criticals", "Makes you do critical hits", Category.COMBAT );
+        INSTANCE = this;
     }
 
-    @Subscribe
-    private void onPacketSend(PacketEvent.Send event) {
-        if (event.getPacket() instanceof ServerboundInteractPacket packet && packet.action.getType() == ServerboundInteractPacket.ActionType.ATTACK) {
-            Entity entity = mc.level.getEntity(packet.entityId);
-            if (entity == null
-                    || entity instanceof EndCrystal
-                    || !mc.player.onGround()
-                    || !(entity instanceof LivingEntity)) return;
+    public void sendCrit(
+            final LocalPlayer player,
+            final Entity entity
+                             )
+    {
+            if ( entity == null || entity instanceof EndCrystal || !player.onGround() || !( entity instanceof LivingEntity ) )
+                return;
 
-            boolean bl = mc.player.horizontalCollision;
-            mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY() + 0.1f, mc.player.getZ(), false, bl));
-            mc.player.connection.send(new ServerboundMovePlayerPacket.Pos(mc.player.getX(), mc.player.getY(), mc.player.getZ(), false, bl));
-            mc.player.crit(entity);
-        }
+            boolean bl = player.horizontalCollision;
+            player.connection.send( new ServerboundMovePlayerPacket.Pos(
+                    player.getX(),
+                    player.getY() + 0.1f,
+                    player.getZ(),
+                    false,
+                    bl
+            ) );
+            player.connection.send( new ServerboundMovePlayerPacket.Pos(
+                    player.getX(),
+                    player.getY(),
+                    player.getZ(),
+                    false,
+                    bl
+            ) );
+            player.crit( entity );
     }
 
     @Override
-    public String getDisplayInfo() {
+    public String getDisplayInfo()
+    {
         return "Packet";
     }
+
 }
